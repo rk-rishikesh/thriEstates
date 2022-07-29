@@ -16,6 +16,7 @@ import { BrandInvoice } from "../constants/Constants.js";
 import { BrandInvoiceABI } from "../constants/Constants.js";
 import Loading from "assets/img/loading.gif";
 import { useIPFS } from "../contexts/IPFS.js";
+import { maxHeight } from "tailwindcss/defaultTheme.js";
 
 const network = "mumbai";
 sequence.initWallet(network);
@@ -523,7 +524,8 @@ export default function Buy(props) {
                                   <img
                                     src={getURLLink(nftObject.image)}
                                     alt="..."
-                                    className="rounded align-middle border-none"
+                                    style= {{maxHeight:"500px"}}
+                                    className="rounded align-middle border-none max-w-860px"
                                   />
                                 </div>
                               </div>

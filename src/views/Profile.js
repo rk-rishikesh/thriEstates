@@ -120,10 +120,6 @@ export default function Profile() {
         <section className="relative block h-500-px">
           <div
             className="absolute top-0 w-full h-full bg-center bg-cover"
-            style={{
-              backgroundImage:
-                "url('https://images.unsplash.com/photo-1499336315816-097655dcfbda?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2710&q=80')",
-            }}
           >
             <span
               id="blackOverlay"
@@ -159,7 +155,7 @@ export default function Profile() {
                     <div className="relative">
                       <img
                         alt="..."
-                        src="https://bafkreiep4gkjqzl6nukkwcwls7z33qtcaer34mew7nll4isca6o5ajrksu.ipfs.nftstorage.link/"
+                        src="https://bafkreihl7xn6a764wk747jxbyia2urowcq5q2iwsm7jrzanrtaxo7hfrlm.ipfs.nftstorage.link/"
                         className="shadow-xl rounded-full h-auto align-middle border-none absolute -m-16 -ml-20 lg:-ml-16 max-w-150-px"
                       />
                     </div>
@@ -170,9 +166,9 @@ export default function Profile() {
                 <br/>
                 <br/>
                 <div className="text-center mt-12">
-                  <h3 className="text-4xl font-semibold leading-normal mb-2 text-blueGray-700 mb-2">
-                    {address}
-                  </h3>
+                  <h6 className="text-2xl font-semibold leading-normal mb-2 text-blueGray-700 mb-2">
+                    Hello, {address} !
+                  </h6>
                 </div>
 
                 <section className="pt-20 pb-48">
@@ -199,7 +195,7 @@ export default function Profile() {
                               href="#link1"
                               role="tablist"
                             >
-                              <i className="fas fa-space-shuttle text-base mr-1"></i>{" "}
+                              
                               Normal
                             </a>
                           </li>
@@ -219,8 +215,8 @@ export default function Profile() {
                               href="#link2"
                               role="tablist"
                             >
-                              <i className="fas fa-cog text-base mr-1"></i>
-                              Confused
+                              
+                              Angry
                             </a>
                           </li>
                           <li className="-mb-px mr-2 last:mr-0 flex-auto text-center">
@@ -239,7 +235,7 @@ export default function Profile() {
                               href="#link3"
                               role="tablist"
                             >
-                              <i className="fas fa-briefcase text-base mr-1"></i>{" "}
+                              
                               Sad
                             </a>
                           </li>
@@ -310,7 +306,7 @@ export default function Profile() {
                         <div className="px-6">
                           <img
                             alt="..."
-                            src="https://www.pinclipart.com/picdir/big/11-111815_lace-clipart-purple-shoe-kids-shoe-clipart-png.png"
+                            src="https://bafkreighjbiqskzrlamr4snrgioydmiqkdipadtmszazcailztcu52zraa.ipfs.nftstorage.link/"
                             className="shadow-lg rounded-full mx-auto max-w-120-px"
                             onClick={(e) => {
                               e.preventDefault();
@@ -327,7 +323,7 @@ export default function Profile() {
                         <div className="px-6">
                           <img
                             alt="..."
-                            src="https://th.bing.com/th/id/OIP.4qo5VKr0QUvg3llz0kwj6AHaHW?w=181&h=187&c=7&r=0&o=5&dpr=1.3&pid=1.7"
+                            src="https://bafkreifkkoh2yl3gnc5s7nojay7phpwikso7sb7kgxhbigrhbh2uhaiy5e.ipfs.nftstorage.link/"
                             className="shadow-lg rounded-full mx-auto max-w-120-px"
                             onClick={(e) => {
                               e.preventDefault();
@@ -335,7 +331,7 @@ export default function Profile() {
                             }}
                           />
                           <div className="pt-6 text-center">
-                            <h5 className="text-xl font-bold">Buffalo Denim</h5>
+                            <h5 className="text-xl font-bold">Nike Cargo Pants</h5>
                           </div>
                         </div>
                       </div>
@@ -343,7 +339,7 @@ export default function Profile() {
                         <div className="px-6">
                           <img
                             alt="..."
-                            src="https://th.bing.com/th/id/OIP.4qo5VKr0QUvg3llz0kwj6AHaHW?w=181&h=187&c=7&r=0&o=5&dpr=1.3&pid=1.7"
+                            src="https://bafkreifcm4v3k5z3oahcydlxamusl3seyxjwjbqhktooanhm42ux7feymi.ipfs.nftstorage.link/"
                             className="shadow-lg rounded-full mx-auto max-w-120-px"
                             onClick={(e) => {
                               e.preventDefault();
@@ -359,7 +355,7 @@ export default function Profile() {
                         <div className="px-6">
                           <img
                             alt="..."
-                            src="https://th.bing.com/th/id/OIP.aOJrqeYWMnRTWB2Nyx4vMQAAAA?pid=ImgDet&rs=1"
+                            src="https://bafkreie5lwvbjbeys76nfszhfsgxxepautghn2ehi7cmycnc2pmcecbkty.ipfs.nftstorage.link/"
                             className="shadow-lg rounded-full mx-auto max-w-120-px"
                             onClick={(e) => {
                               e.preventDefault();

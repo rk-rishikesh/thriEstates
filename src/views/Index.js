@@ -173,9 +173,7 @@ export default function Index() {
                 List your Product
               </h3>
               <p className="text-lg font-light leading-relaxed mt-4 mb-4 text-blueGray-400">
-                is an open source project we wanted to continue this movement
-                too. You can give this version a try to feel the design and also
-                test the quality of the code!
+                Metaverse and NFTs would open up a new gateway for you to reach out to wider range of customers.
               </p>
               <Link to="/listing">
                 <a className="github-star mt-4 inline-block text-white font-bold px-6 py-4 rounded outline-none focus:outline-none mr-1 mb-1 bg-blueGray-700 active:bg-blueGray-600 uppercase text-sm shadow hover:shadow-lg">

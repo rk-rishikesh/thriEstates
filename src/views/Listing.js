@@ -1,15 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  InboxOutlined,
-  ScheduleOutlined,
-  ExpandOutlined,
-} from "@ant-design/icons";
-import { message, Upload } from "antd";
-import { Link } from "react-router-dom";
 
 // components
 
-import Navbar from "components/Navbars/AuthNavbar.js";
+import Navbar from "components/Navbars/IndexNavbar.js";
 import Footer from "components/Footers/Footer.js";
 import { Steps } from "antd";
 import "antd/dist/antd.css";
@@ -21,7 +14,6 @@ import { sequence } from "0xsequence";
 import { BrandVilla } from "../constants/Constants.js";
 import { BrandVillaABI } from "../constants/Constants.js";
 import { useIPFS } from "../contexts/IPFS.js";
-import { ethers } from "ethers";
 
 // Form Utils
 const { Step } = Steps;
@@ -276,10 +268,10 @@ export default function Listing() {
             <div className="w-full md:w-8/12 lg:w-6/12 xl:w-6/12 px-4">
               <div className="pt-32 sm:pt-0">
                 <h2 className="font-semibold text-4xl text-blueGray-600">
-                  Showcase your products on Amazon.in
+                  Showcase your products on BrandVilla
                 </h2>
                 <p className="mt-4 text-lg leading-relaxed text-blueGray-500">
-                  It takes only 15 minutes to setup your account
+                  It takes only 10 minutes to setup your account and get started
                 </p>
                 <div className="mt-12">
                   <a
@@ -310,10 +302,10 @@ export default function Listing() {
                         <i className="fas fa-user-friends text-xl"></i>
                       </div>
                       <h3 className="text-3xl mb-2 font-semibold leading-normal">
-                        How to list your product on Amazon.in
+                        How to list your product on BrandVilla
                       </h3>
                       <p className="text-lg font-light leading-relaxed mt-4 mb-4 text-blueGray-600">
-                        To showcase your products on Amazon.in, you need to list
+                        To showcase your products on BrandVilla, you need to list
                         them from your Seller Central account
                       </p>
                       <p className="text-lg font-light leading-relaxed mt-0 mb-4 text-blueGray-600">
