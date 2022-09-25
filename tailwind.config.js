@@ -18,6 +18,7 @@ module.exports = {
       safelist: [],
     },
   },
+  
   theme: {
     colors: {
       ...colors,
