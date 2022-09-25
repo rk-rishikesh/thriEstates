@@ -10,36 +10,32 @@ import "antd/dist/antd.css";
 // Blockchain
 
 import Web3 from "web3";
-import { sequence } from "0xsequence";
-import { BrandVilla } from "../constants/Constants.js";
-import { BrandVillaABI } from "../constants/Constants.js";
+
+import { ThriEstates } from "../constants/Constants.js";
+import { ThriEstatesABI } from "../constants/Constants.js";
+import { RealEstateNFT } from "../constants/Constants.js";
+import { RealEstateABI } from "../constants/Constants.js";
+import { Marketplace } from "../constants/Constants.js";
+
 import { useIPFS } from "../contexts/IPFS.js";
 
 // Form Utils
 const { Step } = Steps;
 
-// Sequence Wallet Init
-const network = "mumbai";
-sequence.initWallet(network);
-
 export default function Listing() {
   const { IPFSuploading, IPFSerror, IPFSupload } = useIPFS();
-  const inputFileProductRef = useRef(null);
-  const inputFileNFTRef = useRef(null);
-  const inputFileWarrantyRef = useRef(null);
+  const inputFilePropertyRef = useRef(null);
+  const inputFileDocumentOneRef = useRef(null);
 
   // States
   const [loading, setLoading] = useState(false);
   const [address, setUserAddress] = useState();
   const [connected, setConnected] = useState(false);
-  const [productName, setProductName] = useState("");
-  const [productDescription, setProductDescription] = useState("");
-  const [productImage, setProductImage] = useState(null);
-  const [productQuantity, setProductQuantity] = useState(0);
-  const [warrantyImage, setWarrantyImage] = useState(null);
-  const [warrantyPeriod, setWarrantyPeriod] = useState(0);
-  const [nftImage, setNftImage] = useState(null);
-  const [provider, setProvider] = useState(null);
+  const [propertyName, setPropertyName] = useState("");
+  const [propertyDescription, setPropertyDescription] = useState("");
+  const [propertyImage, setPropertyImage] = useState(null);
+  const [propertyCost, setPropertyCost] = useState(0);
+  const [documentOneImage, setDocumentOneImage] = useState(null);
 
   // Step States
   const [one, setOne] = useState(false);
@@ -52,20 +48,14 @@ export default function Listing() {
   const [eight, setEight] = useState(false);
   const [nine, setNine] = useState(false);
   const [ten, setTen] = useState(false);
-  const [eleven, setEleven] = useState(false);
-  const [twelve, setTwelve] = useState(false);
 
-  const [productURI, setProductURI] = useState("");
-  const [warrantyURI, setWarrantyURI] = useState("");
-  const [nftURI, setNFTURI] = useState("");
+  const [PropertyURI, setPropertyURI] = useState("");
+  const [DocumentOneURI, setDocumentOneURI] = useState("");
+
   const [tx, setTransaction] = useState("");
 
   const getStep = () => {
-    if (twelve) {
-      return 12;
-    } else if (eleven) {
-      return 11;
-    } else if (ten) {
+    if (ten) {
       return 10;
     } else if (nine) {
       return 9;
@@ -89,67 +79,48 @@ export default function Listing() {
     return 0;
   };
 
-  // Sequence Integration
-
   const connectWallet = async () => {
-    const wallet = sequence.getWallet();
-    console.log(wallet);
-    const connection = await wallet.connect({
-      app: "BrandVilla",
-      authorize: true,
-      // And pass settings if you would like to customize further
-      settings: {
-        theme: "light",
-        bannerUrl:
-          "https://www.emotivebrand.com/wp-content/uploads/2016/09/tumblr_o05v3eZmyT1ugn1wu_og_1280-1080x675.png", // 3:1 aspect ratio, 1200x400 works best
-        includedPaymentProviders: ["moonpay", "ramp"],
-        defaultFundingCurrency: "matic",
-        lockFundingCurrencyToDefault: false,
-      },
-    });
-    const walletAddress = await wallet.getAddress();
-    const provider = await wallet.getProvider();
-    if (connection.connected) {
-      setUserAddress(walletAddress);
-      setConnected(true);
-      setProvider(provider);
+    // Modern dapp browsers...
+    if (window.ethereum) {
+      window.web3 = new Web3(window.ethereum);
+      console.log(window.web3);
+      await window.ethereum.enable();
+      await accountChangeHandler();
     }
-
-    // if (window.ethereum) {
-    //   // res[0] for fetching a first wallet
-    //   window.ethereum
-    //     .request({ method: "eth_requestAccounts" })
-    //     .then((res) => accountChangeHandler(res[0]));
-    // } else {
-    //   alert("install metamask extension!!");
-    // }
+    // Legacy dapp browsers...
+    else if (window.web3) {
+      window.web3 = new Web3(window.web3.currentProvider);
+      await accountChangeHandler();
+    }
+    // Non-dapp browsers...
+    else {
+      window.alert(
+        "Non-Ethereum browser detected. You should consider trying MetaMask!"
+      );
+    }
   };
 
-  // Function for getting handling all events
-  // const accountChangeHandler = (account) => {
-  //   // Setting an address data
-  //   setUserAddress(account);
-  //   console.log(account);
-  //   setConnected(true);
-  // };
+  const accountChangeHandler = async () => {
+    const web3 = window.web3;
+    // Load account
+    const accounts = await web3.eth.getAccounts();
+    // Setting an address data
+    setUserAddress(accounts[0]);
+    console.log(accounts[0]);
+    setConnected(true);
+  };
 
   // Functions
-  function inputProductImageHandler(e) {
-    inputFileProductRef.current.click();
-    setProductImage(e.target.files[0]);
+  function inputPropertyImageHandler(e) {
+    inputFilePropertyRef.current.click();
+    setPropertyImage(e.target.files[0]);
     setThree(true);
   }
 
-  function inputNFTImageHandler(e) {
-    inputFileNFTRef.current.click();
-    setNftImage(e.target.files[0]);
-    setSeven(true);
-  }
-
-  function inputWarrantyImageHandler(e) {
-    inputFileWarrantyRef.current.click();
-    setWarrantyImage(e.target.files[0]);
-    setSix(true);
+  function inputDocumentOneHandler(e) {
+    inputFileDocumentOneRef.current.click();
+    setDocumentOneImage(e.target.files[0]);
+    setFive(true);
   }
 
   const uploadMetadata = async (name, description, image) => {
@@ -166,97 +137,56 @@ export default function Listing() {
     return metadataUrl;
   };
 
-  const listProduct = async () => {
+  const listProperty = async () => {
+    setSeven(true);
+    let propertyURI = await uploadMetadata(
+      propertyName,
+      propertyDescription,
+      propertyImage
+    );
+    propertyURI = "https://ipfs.io/ipfs/" + propertyURI.slice(7);
+
+    console.log("Property URI : ", propertyURI);
     setEight(true);
-    let productURI = await uploadMetadata(
-      productName,
-      productDescription,
-      productImage
-    );
-    productURI = "https://ipfs.io/ipfs/" + productURI.slice(7);
+    setPropertyURI(propertyURI);
 
-    console.log("Product URI : ", productURI);
+    let documentOneURI = await uploadMetadata(
+      propertyName,
+      propertyName + ": Document One",
+      documentOneImage
+    );
+    documentOneURI = "https://ipfs.io/ipfs/" + documentOneURI.slice(7);
+
+    console.log("Document one URI : ", documentOneURI);
+    setDocumentOneURI(documentOneURI);
     setNine(true);
-    setProductURI(productURI);
 
-    const warrantyDescription =
-      "Warranty Period : " + warrantyPeriod + " Months";
-    let warrantyURI = await uploadMetadata(
-      productName,
-      warrantyDescription,
-      warrantyImage
-    );
-    warrantyURI = "https://ipfs.io/ipfs/" + warrantyURI.slice(7);
+    const web3 = window.web3;
 
-    console.log("Warranty URI : ", warrantyURI);
-    setTen(true);
-    setWarrantyURI(warrantyURI);
-
-    let nftURI = await uploadMetadata(
-      productName,
-      productDescription,
-      nftImage
-    );
-    nftURI = "https://ipfs.io/ipfs/" + nftURI.slice(7);
-
-    console.log("NFT URI : ", nftURI);
-    setEleven(true);
-    setNFTURI(nftURI);
-
-    // Contract Integration
-    // const { ethereum } = window;
-
-    // if (ethereum) {
-    //   console.log("Hello")   
-    //   const web3 = new Web3(ethereum);
-    //   const brandVilla = new web3.eth.Contract(BrandVillaABI, BrandVilla);
-    //   console.log(brandVilla)
-    //   console.log("Tasa")
-    //   let tx = await brandVilla.methods.listItem(
-    //     productURI,
-    //     nftURI,
-    //     productQuantity,
-    //     5,
-    //     warrantyURI
-    //   ).send({ from: address })
-    //     .on("transactionHash", (hash) => {
-    //       console.log(hash);
-    //       setTwelve(true);
-    //       setTransaction("https://mumbai.polygonscan.com/tx/" + hash);
-    //     });
-
-    //   console.log("Listing ... pls wait");
-    //   await tx.wait();
-
-    //   console.log(`Successful: ${tx.hash}`)
-    // }
-
-    const web3 = new Web3(provider);
-    const brandVilla = new web3.eth.Contract(BrandVillaABI, BrandVilla);
-    console.log("Signer : ", address);
-    brandVilla.methods
-      .listItem(
-        productURI,
-        nftURI,
-        productQuantity,
-        100000000000000,
-        warrantyURI
-      )
+    const thriestate = new web3.eth.Contract(ThriEstatesABI, ThriEstates);
+    const realEstate = new web3.eth.Contract(RealEstateABI, RealEstateNFT);
+    
+    thriestate.methods
+      .listProperty(propertyURI, documentOneURI, propertyCost)
       .send({ from: address })
       .on("transactionHash", (hash) => {
         console.log(hash);
-        setTwelve(true);
-        setTransaction(hash);
+        realEstate.methods
+          .setApprovalForAll(Marketplace, true)
+          .send({ from: address })
+          .on("transactionHash", (hash) => {
+            console.log(hash);
+            setLoading(false);
+            setTen(true);
+          });
       });
 
     // Reset Values
-    setProductName("");
-    setProductDescription("");
-    setProductQuantity(0);
-    setWarrantyPeriod(0);
-    setProductImage(null);
-    setNftImage(null);
-    setWarrantyImage(null);
+    setPropertyName("");
+    setPropertyDescription("");
+    setPropertyCost(0);
+    setDocumentOneImage(null);
+    setPropertyImage(null);
   };
 
   return (
@@ -268,7 +198,7 @@ export default function Listing() {
             <div className="w-full md:w-8/12 lg:w-6/12 xl:w-6/12 px-4">
               <div className="pt-32 sm:pt-0">
                 <h2 className="font-semibold text-4xl text-blueGray-600">
-                  Showcase your products on BrandVilla
+                  List Your Property here and sell it safely
                 </h2>
                 <p className="mt-4 text-lg leading-relaxed text-blueGray-500">
                   It takes only 10 minutes to setup your account and get started
@@ -293,60 +223,6 @@ export default function Listing() {
         </section>
         {connected ? (
           <>
-            <section className="pb-20 bg-blueGray-200 -mt-24">
-              <div className="container mx-auto px-4">
-                <div className="flex flex-wrap">
-                  <div className="flex flex-wrap items-center mt-32">
-                    <div className="w-full md:w-5/12 px-4 mr-auto ml-auto">
-                      <div className="text-blueGray-500 p-3 text-center inline-flex items-center justify-center w-16 h-16 mb-6 shadow-lg rounded-full bg-white">
-                        <i className="fas fa-user-friends text-xl"></i>
-                      </div>
-                      <h3 className="text-3xl mb-2 font-semibold leading-normal">
-                        How to list your product on BrandVilla
-                      </h3>
-                      <p className="text-lg font-light leading-relaxed mt-4 mb-4 text-blueGray-600">
-                        To showcase your products on BrandVilla, you need to list
-                        them from your Seller Central account
-                      </p>
-                      <p className="text-lg font-light leading-relaxed mt-0 mb-4 text-blueGray-600">
-                        Create a new listing by uploading product images and
-                        fill in the details
-                      </p>
-                    </div>
-
-                    <div className="w-full md:w-4/12 px-4 mr-auto ml-auto">
-                      <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded-lg bg-blueGray-700">
-                        <img
-                          alt="..."
-                          src="https://bettereviews.com/wp-content/uploads/2020/08/Add-a-heading-1024x1024.png"
-                          className="w-full align-middle rounded-t-lg"
-                        />
-                        <blockquote className="relative p-8 mb-4">
-                          <svg
-                            preserveAspectRatio="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 583 95"
-                            className="absolute left-0 w-full block h-95-px -top-94-px"
-                          >
-                            <polygon
-                              points="-30,95 583,95 583,65"
-                              className="text-blueGray-700 fill-current"
-                            ></polygon>
-                          </svg>
-                          <h4 className="text-xl font-bold text-white">
-                            The future of E-Commerce
-                          </h4>
-                          <p className="text-md font-light mt-2 text-white">
-                            Backed by Blockchain and NFTs
-                          </p>
-                        </blockquote>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-
             <section className="relative py-20">
               <div
                 className="bottom-auto top-0 left-0 right-0 w-full absolute pointer-events-none overflow-hidden -mt-20 h-20"
@@ -374,25 +250,25 @@ export default function Listing() {
                     <div className="relative flex flex-col min-w-0 break-words w-full mb-8 shadow-lg rounded-lg bg-blueGray-200">
                       <div className="flex-auto p-5 lg:p-10">
                         <h4 className="text-2xl font-semibold">
-                          List your product
+                          List your Property
                         </h4>
 
                         <p className="leading-relaxed mt-1 mb-4 text-blueGray-500">
-                          Input the required details of the product
+                          Input the required details of the property
                         </p>
                         <div className="relative w-full mb-3 mt-8">
                           <label
                             className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
                             htmlFor="full-name"
                           >
-                            Product Name
+                            Property Name
                           </label>
                           <input
                             type="text"
                             className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                             placeholder="Product Name"
                             onChange={(e) => {
-                              setProductName(e.target.value);
+                              setPropertyName(e.target.value);
                               setOne(true);
                             }}
                           />
@@ -403,15 +279,18 @@ export default function Listing() {
                             className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
                             htmlFor="full-name"
                           >
-                            PRODUCT QUANTITY
+                            Property Cost In Matic
                           </label>
                           <input
                             type="number"
                             className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                            placeholder="Product Quantity"
+                            placeholder="Product Cost"
                             onChange={(e) => {
-                              setProductQuantity(e.target.value);
+                              var cost = e.target.value;
+                              console.log(cost);
+                              setPropertyCost(cost * 1000000000000000000);
                               setTwo(true);
+                              console.log(propertyCost);
                             }}
                           />
                         </div>
@@ -421,13 +300,13 @@ export default function Listing() {
                             className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
                             htmlFor="full-name"
                           >
-                            Product Image
+                            Property Image
                           </label>
                           <input
-                            ref={inputFileProductRef}
+                            ref={inputFilePropertyRef}
                             type="file"
                             className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                            onChange={(e) => inputProductImageHandler(e)}
+                            onChange={(e) => inputPropertyImageHandler(e)}
                           />
                         </div>
 
@@ -436,7 +315,7 @@ export default function Listing() {
                             className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
                             htmlFor="message"
                           >
-                            Product Description
+                            Property Description
                           </label>
                           <textarea
                             rows="4"
@@ -444,7 +323,7 @@ export default function Listing() {
                             className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
                             placeholder="Product Description..."
                             onChange={(e) => {
-                              setProductDescription(e.target.value);
+                              setPropertyDescription(e.target.value);
                               setFour(true);
                             }}
                           />
@@ -455,56 +334,23 @@ export default function Listing() {
                             className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
                             htmlFor="full-name"
                           >
-                            WARRANTY PERIOD IN MONTHS
+                            Property Document
                           </label>
                           <input
-                            type="number"
-                            className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                            placeholder="Product Warranty in Months"
-                            onChange={(e) => {
-                              setWarrantyPeriod(e.target.value);
-                              setFive(true);
-                            }}
-                          />
-                        </div>
-
-                        <div className="relative w-full mb-3 mt-8">
-                          <label
-                            className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                            htmlFor="full-name"
-                          >
-                            WARRANTY CARD
-                          </label>
-                          <input
-                            ref={inputFileWarrantyRef}
+                            ref={inputFileDocumentOneRef}
                             type="file"
                             className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                            onChange={(e) => inputWarrantyImageHandler(e)}
+                            onChange={(e) => inputDocumentOneHandler(e)}
                           />
                         </div>
 
-                        <div className="relative w-full mb-3 mt-8">
-                          <label
-                            className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                            htmlFor="full-name"
-                          >
-                            NFT VERSION OF PRODUCT
-                          </label>
-
-                          <input
-                            ref={inputFileNFTRef}
-                            type="file"
-                            className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                            onChange={(e) => inputNFTImageHandler(e)}
-                          />
-                        </div>
                         <div className="text-center mt-6">
                           <button
                             className="bg-blueGray-800 text-white active:bg-blueGray-600 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
                             type="button"
-                            onClick={listProduct}
+                            onClick={listProperty}
                           >
-                            List Product
+                            List Property
                           </button>
                         </div>
                       </div>
@@ -518,43 +364,35 @@ export default function Listing() {
                         current={getStep()}
                       >
                         <Step
-                          title="Product Name"
-                          description="Enter Product Name"
+                          title="Property Name"
+                          description="Enter Property Name"
                         />
                         <Step
-                          title="Product Quantity"
-                          description="Enter Product Quantity"
+                          title="Property Cost"
+                          description="Enter Property Cost"
                         />
                         <Step
-                          title="Product Image"
-                          description="Upload Product Image"
+                          title="Property Image"
+                          description="Upload Property Image"
                         />
                         <Step
-                          title="Product Description"
-                          description="Enter product description"
+                          title="Property Description"
+                          description="Enter Property description"
                         />
                         <Step
-                          title="Warranty Period in Months"
-                          description="Enter product warranty period in months"
+                          title="Property Document"
+                          description="Upload Property Document"
                         />
                         <Step
-                          title="Warranty Card"
-                          description="Upload product Warranty Card"
+                          title="List Property"
+                          description="Confirm the details and click on List Property"
                         />
                         <Step
-                          title="NFT version of Product"
-                          description="Upload NFT version of product"
-                        />
-                        <Step
-                          title="List Product"
-                          description="Confirm the details and click on List product"
-                        />
-                        <Step
-                          title="Generating Product URI"
+                          title="Generating Property URI"
                           description={
                             nine ? (
-                              <a href={productURI} clickable target="_blank">
-                                Product URI
+                              <a href={PropertyURI} clickable target="_blank">
+                                Property URI
                               </a>
                             ) : (
                               "Generating ..."
@@ -562,95 +400,30 @@ export default function Listing() {
                           }
                         />
                         <Step
-                          title="Generating Warranty Card URI"
+                          title="Generating Property Document URI"
                           description={
-                            ten ? (
-                              <a href={warrantyURI} clickable target="_blank">
-                                Warranty Card URI
+                            nine ? (
+                              <a
+                                href={DocumentOneURI}
+                                clickable
+                                target="_blank"
+                              >
+                                Property Document URI
                               </a>
                             ) : (
                               "Generating ..."
                             )
                           }
                         />
-                        <Step
-                          title="Generating Product NFT URI"
-                          description={
-                            eleven ? (
-                              <a href={nftURI} clickable target="_blank">
-                                NFT URI
-                              </a>
-                            ) : (
-                              "Generating ..."
-                            )
-                          }
-                        />
+
                         <Step
                           title="Confirm the transaction"
                           description={
-                            twelve ? tx : "Waiting for confirmation ..."
+                            ten ? tx : "Waiting for confirmation ..."
                           }
                         />
                       </Steps>
                     </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <section className="pb-20 relative block bg-blueGray-800">
-              <div
-                className="bottom-auto top-0 left-0 right-0 w-full absolute pointer-events-none overflow-hidden -mt-20 h-20"
-                style={{ transform: "translateZ(0)" }}
-              >
-                <svg
-                  className="absolute bottom-0 overflow-hidden"
-                  xmlns="http://www.w3.org/2000/svg"
-                  preserveAspectRatio="none"
-                  version="1.1"
-                  viewBox="0 0 2560 100"
-                  x="0"
-                  y="0"
-                >
-                  <polygon
-                    className="text-blueGray-800 fill-current"
-                    points="2560 0 2560 100 0 100"
-                  ></polygon>
-                </svg>
-              </div>
-
-              <div className="container mx-auto px-4 lg:pt-24 lg:pb-64">
-                <div className="flex flex-wrap text-center justify-center">
-                  <div className="w-full lg:w-6/12 px-4">
-                    <h2 className="text-4xl font-semibold text-white">
-                      Sell your products the GenZ way
-                    </h2>
-                  </div>
-                </div>
-                <div className="flex flex-wrap mt-12 justify-center">
-                  <div className="w-full lg:w-3/12 px-4 text-center">
-                    <div className="text-blueGray-800 p-3 w-12 h-12 shadow-lg rounded-full bg-white inline-flex items-center justify-center">
-                      <i className="fas fa-medal text-xl"></i>
-                    </div>
-                    <h6 className="text-xl mt-5 font-semibold text-white">
-                      Give your Product a Virtual Existence with NFTs
-                    </h6>
-                  </div>
-                  <div className="w-full lg:w-3/12 px-4 text-center">
-                    <div className="text-blueGray-800 p-3 w-12 h-12 shadow-lg rounded-full bg-white inline-flex items-center justify-center">
-                      <i className="fas fa-poll text-xl"></i>
-                    </div>
-                    <h5 className="text-xl mt-5 font-semibold text-white">
-                      Autogenerated SBT backed invoice
-                    </h5>
-                  </div>
-                  <div className="w-full lg:w-3/12 px-4 text-center">
-                    <div className="text-blueGray-800 p-3 w-12 h-12 shadow-lg rounded-full bg-white inline-flex items-center justify-center">
-                      <i className="fas fa-lightbulb text-xl"></i>
-                    </div>
-                    <h5 className="text-xl mt-5 font-semibold text-white">
-                      Generate NFT backed Warranty Cards
-                    </h5>
                   </div>
                 </div>
               </div>

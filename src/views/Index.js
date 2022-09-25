@@ -14,16 +14,14 @@ export default function Index() {
           <div className="w-full md:w-8/12 lg:w-6/12 xl:w-6/12 px-4">
             <div className="pt-32 sm:pt-0">
               <h2 className="font-semibold text-4xl text-blueGray-600">
-                BrandVilla
+                3Estates
               </h2>
               <h2 className="font-semibold text-3xl text-blueGray-600">
-                Not just your normal E-Commerce website
+                Real Estates Platform backed by the security of Blockchain
               </h2>
               <br/>
               <p className="mt-4 text-lg leading-relaxed text-blueGray-500">
-                Get quality products from authorized dealers along with NFTs to
-                design your Metaverse character.
-                Live the virtual life in the real way !!
+              “The house you looked at today and wanted to think about until tomorrow may be the same house someone looked at yesterday and will buy today.”
               </p>
             </div>
             <br />
@@ -60,89 +58,18 @@ export default function Index() {
 
         <div className="container mx-auto overflow-hidden pb-20">
           <div className="flex flex-wrap items-center pt-32">
-            <div className="w-full md:w-6/12 px-4 mr-auto ml-auto mt-32">
+            <div className="w-full md:w-8/12 px-4 mr-auto ml-auto mt-32">
               <div className="justify-center flex flex-wrap relative">
-                <div className="my-4 w-full lg:w-6/12 px-4">
+                <div className="my-4 w-full lg:w-8/12 px-4">
                   <Link to="/product">
-                    <div className="bg-red-600 shadow-lg rounded-lg text-center p-8">
+                    <div className="bg-lightBlue-200 shadow-lg rounded-lg text-center p-8">
                       <img
                         alt="..."
                         className="align-middle border-none max-w-full h-auto rounded-lg"
-                        src="https://www.off-the-pitch.com/dw/image/v2/BCXN_PRD/on/demandware.static/-/Sites-otp-EU-Library/default/dw7f46305b/ss22/category_footwear_mobile.jpg?sw=768&sfrm=jpg"
+                        src="https://img1.wsimg.com/isteam/ip/91c74706-178e-4c8c-aee7-c4fc7301e671/ialicante-mediterranean-homes-475777-unsp-0001.jpg/:/rs=w:1300,h:800"
                       />
-                      <p className="text-lg text-white mt-4 font-semibold">
-                        Shoe Wear
-                      </p>
                     </div>
                   </Link>
-                  <Link to="/product">
-                    <div className="bg-lightBlue-500 shadow-lg rounded-lg text-center p-8 mt-8">
-                      <img
-                        alt="..."
-                        className="align-middle border-none max-w-full h-auto rounded-lg"
-                        src="https://img.etimg.com/thumb/msid-66009798,width-650,imgsize-621307,,resizemode-4,quality-100/dress.jpg"
-                      />
-                      <p className="text-lg text-white mt-4 font-semibold">
-                        Traditionals
-                      </p>
-                    </div>
-                  </Link>
-                  <Link to="/product">
-                    <div className="bg-blueGray-700 shadow-lg rounded-lg text-center p-8 mt-8">
-                      <img
-                        alt="..."
-                        className="align-middle border-none max-w-full h-auto rounded-lg"
-                        src="https://cdn.shopify.com/s/files/1/0164/0765/8560/files/categorymen-banner_1600x.jpg?v=1630673453"
-                      />
-                      <p className="text-lg text-white mt-4 font-semibold">
-                        Men's Collection
-                      </p>
-                    </div>
-                  </Link>
-                </div>
-                <div className="my-4 w-full lg:w-6/12 px-4 lg:mt-16">
-                  <Link to="/product">
-                    <div className="bg-yellow-500 shadow-lg rounded-lg text-center p-8">
-                      <img
-                        alt="..."
-                        className="align-middle border-none max-w-full h-auto rounded-lg"
-                        src="https://www.businessinsider.in/photo/34312792/samsung-breaks-into-a-new-product-category-premium-headphones-and-audio-devices.jpg"
-                      />
-                      <p className="text-lg text-white mt-4 font-semibold">
-                        Electronics
-                      </p>
-                    </div>
-                  </Link>
-                  <a
-                    // href="https://www.creative-tim.com/learning-lab/tailwind/angular/alerts/notus?ref=vtw-index"
-                    target="_blank"
-                  >
-                    <div className="bg-red-700 shadow-lg rounded-lg text-center p-8 mt-8">
-                      <img
-                        alt="..."
-                        className="align-middle border-none max-w-full h-auto rounded-lg"
-                        src="https://nypost.com/wp-content/uploads/sites/2/2022/05/Best-Linen-Pants.png"
-                      />
-                      <p className="text-lg text-white mt-4 font-semibold">
-                        Women's Wear
-                      </p>
-                    </div>
-                  </a>
-                  <a
-                    // href="https://www.creative-tim.com/learning-lab/tailwind/vue/alerts/notus?ref=vtw-index"
-                    target="_blank"
-                  >
-                    <div className="bg-emerald-500 shadow-lg rounded-lg text-center p-8 mt-8">
-                      <img
-                        alt="..."
-                        className="align-middle border-none max-w-full h-auto rounded-lg"
-                        src="https://myeyewellness.com/wp-content/uploads/2022/02/assorted-glasses.jpg"
-                      />
-                      <p className="text-lg text-white mt-4 font-semibold">
-                        Eye Wear
-                      </p>
-                    </div>
-                  </a>
                 </div>
               </div>
             </div>
@@ -152,10 +79,10 @@ export default function Index() {
                 <i className="fas fa-solid fa-store text-xl"></i>
               </div>
               <h3 className="text-3xl mb-2 font-semibold leading-normal">
-                The GenZ's shopping new destination
+                Browse Properties Here
               </h3>
               <p className="text-lg font-light leading-relaxed mt-4 mb-4 text-blueGray-600">
-                First ever marketplace backed by power of Blockchain and NFTs
+                Real Estate marketplace backed by power of Blockchain and NFTs
               </p>
             </div>
           </div>
@@ -170,10 +97,10 @@ export default function Index() {
                 <i className="fas fa-solid fa-tag text-xl"></i>
               </div>
               <h3 className="text-3xl mb-2 font-semibold leading-normal text-white">
-                List your Product
+                List your Property
               </h3>
               <p className="text-lg font-light leading-relaxed mt-4 mb-4 text-blueGray-400">
-                Metaverse and NFTs would open up a new gateway for you to reach out to wider range of customers.
+                Convert your property into NFT and safely transfer using the power of Blockchain
               </p>
               <Link to="/listing">
                 <a className="github-star mt-4 inline-block text-white font-bold px-6 py-4 rounded outline-none focus:outline-none mr-1 mb-1 bg-blueGray-700 active:bg-blueGray-600 uppercase text-sm shadow hover:shadow-lg">

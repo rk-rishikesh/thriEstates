@@ -5,30 +5,40 @@ import Footer from "components/Footers/Footer.js";
 import { Link } from "react-router-dom";
 // Blockchain
 import Web3 from "web3";
-import { sequence } from "0xsequence";
-import { BrandVilla } from "../constants/Constants.js";
-import { BrandVillaABI } from "../constants/Constants.js";
-import { BrandCollection } from "../constants/Constants.js";
-import { BrandCollectionABI } from "../constants/Constants.js";
-import { BrandWarranty } from "../constants/Constants.js";
-import { BrandWarrantyABI } from "../constants/Constants.js";
-import { BrandInvoice } from "../constants/Constants.js";
-import { BrandInvoiceABI } from "../constants/Constants.js";
-import Loading from "assets/img/loading.gif";
-import { useIPFS } from "../contexts/IPFS.js";
-import { maxHeight } from "tailwindcss/defaultTheme.js";
 
-const network = "mumbai";
-sequence.initWallet(network);
+import { RealEstateNFT } from "../constants/Constants.js";
+import { RealEstateABI } from "../constants/Constants.js";
+
+import { Document } from "../constants/Constants.js";
+import { DocumentABI } from "../constants/Constants.js";
+
+import { Marketplace } from "../constants/Constants.js";
+import { MarketplaceABI } from "../constants/Constants.js";
+
+import Loading from "assets/img/loading.gif";
+import makePaymentImg from "assets/img/makePayment.jpeg";
+import dealClosed from "assets/img/dealClosed.jpeg";
+import releasePaymentImg from "assets/img/releasePayment.jpeg";
+
+import { useIPFS } from "../contexts/IPFS.js";
+
+import { maxHeight } from "tailwindcss/defaultTheme.js";
 
 export default function Buy(props) {
   const { id } = props.match.params;
-  const { IPFSuploading, IPFSerror, IPFSupload, invoiceUpload } = useIPFS();
-
+  const { IPFSuploading, IPFSerror, IPFSupload, userDetailsUpload } = useIPFS();
+  const inputFileDocument = useRef(null);
   useEffect(async () => {
     await connectWallet();
     await getProductDetails();
   }, []);
+
+  const [propertyName, setPropertyName] = useState("");
+  const [propertyImage, setPropertyImage] = useState("");
+  const [propertyDoc, setPropertyDoc] = useState("");
+  const [propertyDesc, setPropertyDesc] = useState("");
+  const [estateObject, setEstateObject] = useState("");
+  const [userDoc, setUserDoc] = useState(null);
 
   const [showModal, setShowModal] = React.useState(false);
   const [showNFT, setShowNFT] = React.useState(false);
@@ -54,95 +64,91 @@ export default function Buy(props) {
 
   const connectWallet = async () => {
     setLoading(true);
+    console.log(loading);
     console.log("== Connecting Wallet");
-    const wallet = sequence.getWallet();
-    if (wallet.isConnected()) {
-      const walletAddress = await wallet.getAddress();
-      const provider = await wallet.getProvider();
-      setUserAddress(walletAddress);
-      setConnected(true);
-      setProvider(provider);
-    } else {
-      wallet.openWallet();
-      const connection = await wallet.connect({
-        app: "BrandVilla",
-        authorize: true,
-        // And pass settings if you would like to customize further
-        settings: {
-          theme: "light",
-          bannerUrl:
-            "https://www.emotivebrand.com/wp-content/uploads/2016/09/tumblr_o05v3eZmyT1ugn1wu_og_1280-1080x675.png", // 3:1 aspect ratio, 1200x400 works best
-          includedPaymentProviders: ["moonpay", "ramp"],
-          defaultFundingCurrency: "matic",
-          lockFundingCurrencyToDefault: false,
-        },
-      });
+
+    // Modern dapp browsers...
+    if (window.ethereum) {
+      window.web3 = new Web3(window.ethereum);
+      console.log(window.web3);
+      await window.ethereum.enable();
+      await accountChangeHandler();
+    }
+    // Legacy dapp browsers...
+    else if (window.web3) {
+      window.web3 = new Web3(window.web3.currentProvider);
+      await accountChangeHandler();
+    }
+    // Non-dapp browsers...
+    else {
+      window.alert(
+        "Non-Ethereum browser detected. You should consider trying MetaMask!"
+      );
     }
   };
 
-  const makePayment = async () => {
+  const accountChangeHandler = async () => {
+    const web3 = window.web3;
+    // Load account
+    const accounts = await web3.eth.getAccounts();
+    // Setting an address data
+    setUserAddress(accounts[0]);
+    console.log(accounts[0]);
+    setConnected(true);
+    setLoading(false);
+  };
+
+  function inputUserDocumentHandler(e) {
+    inputFileDocument.current.click();
+    setUserDoc(e.target.files[0]);
+  }
+
+  const checkDeal = async () => {
     setShowModal(true);
   };
 
   const getProductDetails = async () => {
     // Contract Integration
-    console.log("== Loading Product Details");
-    const wallet = sequence.getWallet();
-    const provider = await wallet.getProvider();
-    const web3 = new Web3(provider);
-    const brandVilla = new web3.eth.Contract(BrandVillaABI, BrandVilla);
-    console.log(brandVilla);
-    console.log("Tasa");
-    const product = await brandVilla.methods.items(id).call();
-    console.log("Product", product);
-    setProduct(product);
-    const productObj = await parseURL(product.productURI);
-    setProductObject(productObj);
-    console.log(productObj);
-    await getNFTDetails(product.itemNftID);
-    await getWarrantyDetails(product.itemWarrantyCardID);
+    const web3 = window.web3;
+    const realEstateNFT = new web3.eth.Contract(RealEstateABI, RealEstateNFT);
+    const marketplace = new web3.eth.Contract(MarketplaceABI, Marketplace);
+    const document = new web3.eth.Contract(DocumentABI, Document);
+
+    console.log("== Loading Product Details ==");
+    const estate = await marketplace.methods.estates(id).call();
+    console.log(estate);
+    setEstateObject(estate);
+
+    const estateUri = await realEstateNFT.methods.tokenURI(id).call();
+    console.log(estateUri);
+    let estateDetails = await parseURL(estateUri);
+    setPropertyDesc(estateDetails.description);
+    const img = await getProductImage(estateUri);
+    console.log(img);
+    setPropertyImage(img);
+    const documentURI = await document.methods.tokenURI(id).call();
+    const pd = await parseURL(documentURI);
+    const doc = await getDocument(pd.image);
+    console.log(doc.toString());
+    setPropertyDoc(doc.toString());
+    console.log(pd.name);
+    setPropertyName(pd.name);
   };
 
-  const getNFTDetails = async (tokenID) => {
-    // Contract Integration
-    console.log("== Loading NFT Details");
-    const wallet = sequence.getWallet();
-    const provider = await wallet.getProvider();
-
-    const web3 = new Web3(provider);
-    const brandCollection = new web3.eth.Contract(
-      BrandCollectionABI,
-      BrandCollection
-    );
-    console.log(brandCollection);
-    const nft = await brandCollection.methods.uri(tokenID).call();
-    console.log(nft);
-    const nftObj = await parseURL(nft);
-    setNftObject(nftObj);
-    console.log(nftObj);
+  const getProductImage = async (url) => {
+    let imageURL = await parseURL(url);
+    let image = imageURL.image;
+    image = image.toString();
+    return "https://ipfs.io/ipfs/" + image.slice(7);
   };
 
-  const getWarrantyDetails = async (tokenID) => {
-    // Contract Integration
-    console.log("== Loading Warranty Details");
-    const wallet = sequence.getWallet();
-    const provider = await wallet.getProvider();
-
-    const web3 = new Web3(provider);
-    const brandWarranty = new web3.eth.Contract(
-      BrandWarrantyABI,
-      BrandWarranty
-    );
-    console.log(brandWarranty);
-    const warranty = await brandWarranty.methods.uri(tokenID).call();
-    console.log(warranty);
-    const warrantyObj = await parseURL(warranty);
-    setWarrantyObject(warrantyObj);
-    console.log(warrantyObj);
-    setLoading(false);
+  const getDocument = async (url) => {
+    let doc = url.toString();
+    console.log(doc);
+    return "https://ipfs.io/ipfs/" + doc.slice(7);
   };
 
-  const uploadMetadata = async (name, totalCost) => {
+  const uploadMetadata = async (name) => {
     console.log("== Uploading Metadata == ");
     var today = new Date();
     var dd = String(today.getDate()).padStart(2, "0");
@@ -152,21 +158,16 @@ export default function Buy(props) {
     today = mm + "/" + dd + "/" + yyyy;
     console.log(today);
     console.log(name);
-    console.log(totalCost);
 
-    const metadataUrl = await invoiceUpload({
+    const metadataUrl = await userDetailsUpload({
       name: name,
       today: today,
       firstName: firstName,
       lastName: lastName,
       emailID: emailID,
       contactNumber: contactNumber,
-      address: shipmentAddress,
-      city: city,
-      country: country,
-      postalCode: postalCode,
-      totalCost: totalCost,
     });
+
     console.log(metadataUrl);
 
     return metadataUrl;
@@ -184,27 +185,60 @@ export default function Buy(props) {
     return "https://ipfs.io/ipfs/" + image.slice(7);
   };
 
-  const generateInvoice = async () => {
+  const initiateDeal = async () => {
     setLoading(true);
-    console.log(productObject);
-    let invoiceURL = await uploadMetadata(productObject.name, product.cost, "");
+
+    let invoiceURL = await uploadMetadata(propertyName);
     invoiceURL = getURLLink(invoiceURL);
 
     console.log("Invoice URI : ", invoiceURL);
-    setInvoiceURI(invoiceURL)
+    setInvoiceURI(invoiceURL);
     // Contract Integration
-    const web3 = new Web3(provider);
-    const brandVilla = new web3.eth.Contract(BrandVillaABI, BrandVilla);
-    console.log("Signer : ", address);
-    brandVilla.methods
-      .buyItem(id, invoiceURL)
-      .send({ from: address, value: product.cost })
+    const web3 = window.web3;
+
+    const marketplace = new web3.eth.Contract(MarketplaceABI, Marketplace);
+
+    marketplace.methods
+      .initateDeal(id, address)
+      .send({ from: address })
       .on("transactionHash", (hash) => {
         console.log(hash);
         setLoading(false);
-        setShowNFT(true);
       });
   };
+
+  const makePayment = async () => {
+    setLoading(true);
+    // Contract Integration
+    const web3 = window.web3;
+
+    const marketplace = new web3.eth.Contract(MarketplaceABI, Marketplace);
+
+    marketplace.methods
+      .makePayment(id)
+      .send({ from: address, value: estateObject.amount })
+      .on("transactionHash", (hash) => {
+        console.log(hash);
+        setLoading(false);
+      });
+  };
+
+  const releasePayment = async () => {
+    setLoading(true);
+    // Contract Integration
+    const web3 = window.web3;
+
+    const marketplace = new web3.eth.Contract(MarketplaceABI, Marketplace);
+
+    marketplace.methods
+      .releasePayment(id)
+      .send({ from: address })
+      .on("transactionHash", (hash) => {
+        console.log(hash);
+        setLoading(false);
+      });
+  };
+
   if (loading) {
     return (
       <section>
@@ -233,176 +267,235 @@ export default function Buy(props) {
                   {/*body*/}
                   <div class="relative p-6 flex-auto">
                     <div className="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded-lg bg-blueGray-100 border-0">
-                      <div className="rounded-t bg-white mb-0 px-6 py-6">
-                        <div className="text-center flex justify-between">
-                          <h6 className="text-blueGray-700 text-xl font-bold">
-                            Enter Shipment Details
-                          </h6>
+                      {estateObject.dealClosed && (
+                        <>
+                          <div className="rounded-t bg-white mb-0 px-6 py-6">
+                            <div className="text-center flex justify-between">
+                              <h6 className="text-blueGray-700 text-xl font-bold">
+                                Deal Closed
+                              </h6>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-wrap justify-center">
+                            <div className="w-3/12 sm:w-4/12 px-4">
+                              <br />
+                              <img
+                                src={dealClosed}
+                                style={{height:"380px", width:"600px"}}
+                                alt="..."
+                                className="rounded max-w-full h-auto align-middle border-none"
+                              />
+                            </div>
+                          </div>
+                          <hr className="mt-6 border-b-1 border-blueGray-300" />
+                          <br />
+                        </>
+                      )}
+                      {estateObject.paymentIssued && !estateObject.dealClosed && (
+                        <>
+                          <div className="rounded-t bg-white mb-0 px-6 py-6">
+                            <div className="text-center flex justify-between">
+                              <h6 className="text-blueGray-700 text-xl font-bold">
+                                Release Payment
+                              </h6>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-wrap justify-center">
+                            <div className="w-3/12 sm:w-4/12 px-4">
+                              <br />
+                              <img
+                                src={releasePaymentImg}
+                                style={{height:"380px", width:"600px"}}
+                                alt="..."
+                                className="rounded max-w-full h-auto align-middle border-none"
+                              />
+                            </div>
+                          </div>
+                          <hr className="mt-6 border-b-1 border-blueGray-300" />
+                          <br />
+                          <button
+                            className="bg-emerald-500 text-white active:bg-emerald-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+                            type="button"
+                            onClick={() => {
+                              releasePayment();
+                              setShowModal(false);
+                            }}
+                          >
+                            Release Payment
+                          </button>
+                        </>
+                      )}
+                      {estateObject.dealInitated &&
+                        !estateObject.paymentIssued && (
+                          <>
+                            <div className="rounded-t bg-white mb-0 px-6 py-6">
+                              <div className="text-center flex justify-between">
+                                <h6 className="text-blueGray-700 text-xl font-bold">
+                                  Make Payment
+                                </h6>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-wrap justify-center">
+                              <div className="w-3/12 sm:w-4/12 px-4">
+                                <br />
+                                <img
+                                  alt="..."
+                                  className="rounded max-w-full h-auto align-middle border-none"
+                                  src={makePaymentImg}
+                                  style={{height:"380px", width:"600px"}}
+                                />
+                              </div>
+                            </div>
+                            <hr className="mt-6 border-b-1 border-blueGray-300" />
+                            <br />
+                            <button
+                              className="bg-emerald-500 text-white active:bg-emerald-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+                              type="button"
+                              onClick={() => {
+                                makePayment();
+                                setShowModal(false);
+                              }}
+                            >
+                              Make Payment
+                            </button>
+                          </>
+                        )}
+                      {!estateObject.dealInitated && (
+                        <div>
+                          <div className="rounded-t bg-white mb-0 px-6 py-6">
+                            <div className="text-center flex justify-between">
+                              <h6 className="text-blueGray-700 text-xl font-bold">
+                                Enter Your Details
+                              </h6>
+                            </div>
+                          </div>
+
+                          <div className="flex-auto px-4 lg:px-10 py-10 pt-0">
+                            <form>
+                              <h6 className="text-blueGray-400 text-sm mt-3 mb-6 font-bold uppercase">
+                                User Information
+                              </h6>
+                              <div className="flex flex-wrap">
+                                <div className="w-full lg:w-6/12 px-4">
+                                  <div className="relative w-full mb-3">
+                                    <label
+                                      className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
+                                      htmlFor="grid-password"
+                                    >
+                                      First Name
+                                    </label>
+                                    <input
+                                      type="text"
+                                      className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                      placeholder="First Name"
+                                      onChange={(e) => {
+                                        setFirstName(e.target.value);
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                                <div className="w-full lg:w-6/12 px-4">
+                                  <div className="relative w-full mb-3">
+                                    <label
+                                      className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
+                                      htmlFor="grid-password"
+                                    >
+                                      Last Name
+                                    </label>
+                                    <input
+                                      type="text"
+                                      className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                      placeholder="Last Name"
+                                      onChange={(e) => {
+                                        setLastName(e.target.value);
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                                <div className="w-full lg:w-6/12 px-4">
+                                  <div className="relative w-full mb-3">
+                                    <label
+                                      className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
+                                      htmlFor="grid-password"
+                                    >
+                                      Email ID
+                                    </label>
+                                    <input
+                                      type="email"
+                                      className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                      placeholder="thriestates@gmail.com"
+                                      onChange={(e) => {
+                                        setEmailID(e.target.value);
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                                <div className="w-full lg:w-6/12 px-4">
+                                  <div className="relative w-full mb-3">
+                                    <label
+                                      className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
+                                      htmlFor="grid-password"
+                                    >
+                                      Contact Number
+                                    </label>
+                                    <input
+                                      type="text"
+                                      className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                      placeholder="98-XXX-XXX-00"
+                                      onChange={(e) => {
+                                        setContactNumber(e.target.value);
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+
+                              <hr className="mt-6 border-b-1 border-blueGray-300" />
+
+                              <h6 className="text-blueGray-400 text-sm mt-3 mb-6 font-bold uppercase">
+                                Upload Documents
+                              </h6>
+
+                              <div className="flex flex-wrap">
+                                <div className="w-full lg:w-12/12 px-4">
+                                  <div className="relative w-full mb-3 mt-8">
+                                    <label
+                                      className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
+                                      htmlFor="full-name"
+                                    >
+                                      User Document
+                                    </label>
+                                    <input
+                                      ref={inputFileDocument}
+                                      type="file"
+                                      className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                      onChange={(e) =>
+                                        inputUserDocumentHandler(e)
+                                      }
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+
+                              <hr className="mt-6 border-b-1 border-blueGray-300" />
+                            </form>
+                            <br />
+                            <button
+                              className="bg-emerald-500 text-white active:bg-emerald-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+                              type="button"
+                              onClick={() => {
+                                initiateDeal();
+                                setShowModal(false);
+                              }}
+                            >
+                              Initiate Deal
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex-auto px-4 lg:px-10 py-10 pt-0">
-                        <form>
-                          <h6 className="text-blueGray-400 text-sm mt-3 mb-6 font-bold uppercase">
-                            User Information
-                          </h6>
-                          <div className="flex flex-wrap">
-                            <div className="w-full lg:w-6/12 px-4">
-                              <div className="relative w-full mb-3">
-                                <label
-                                  className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                                  htmlFor="grid-password"
-                                >
-                                  First Name
-                                </label>
-                                <input
-                                  type="text"
-                                  className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                  placeholder="First Name"
-                                  onChange={(e) => {
-                                    setFirstName(e.target.value);
-                                  }}
-                                />
-                              </div>
-                            </div>
-                            <div className="w-full lg:w-6/12 px-4">
-                              <div className="relative w-full mb-3">
-                                <label
-                                  className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                                  htmlFor="grid-password"
-                                >
-                                  Last Name
-                                </label>
-                                <input
-                                  type="text"
-                                  className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                  placeholder="Last Name"
-                                  onChange={(e) => {
-                                    setLastName(e.target.value);
-                                  }}
-                                />
-                              </div>
-                            </div>
-                            <div className="w-full lg:w-6/12 px-4">
-                              <div className="relative w-full mb-3">
-                                <label
-                                  className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                                  htmlFor="grid-password"
-                                >
-                                  Email ID
-                                </label>
-                                <input
-                                  type="email"
-                                  className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                  placeholder="brandvilla@gmail.com"
-                                  onChange={(e) => {
-                                    setEmailID(e.target.value);
-                                  }}
-                                />
-                              </div>
-                            </div>
-                            <div className="w-full lg:w-6/12 px-4">
-                              <div className="relative w-full mb-3">
-                                <label
-                                  className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                                  htmlFor="grid-password"
-                                >
-                                  Contact Number
-                                </label>
-                                <input
-                                  type="text"
-                                  className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                  placeholder="98-XXX-XXX-00"
-                                  onChange={(e) => {
-                                    setContactNumber(e.target.value);
-                                  }}
-                                />
-                              </div>
-                            </div>
-                          </div>
-
-                          <hr className="mt-6 border-b-1 border-blueGray-300" />
-
-                          <h6 className="text-blueGray-400 text-sm mt-3 mb-6 font-bold uppercase">
-                            Deliver At
-                          </h6>
-                          <div className="flex flex-wrap">
-                            <div className="w-full lg:w-12/12 px-4">
-                              <div className="relative w-full mb-3">
-                                <label
-                                  className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                                  htmlFor="grid-password"
-                                >
-                                  Address
-                                </label>
-                                <input
-                                  type="text"
-                                  className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                  placeholder="Bld Mihail Kogalniceanu, nr. 8 Bl 1, Sc 1, Ap 09"
-                                  onChange={(e) => {
-                                    setShipmentAddress(e.target.value);
-                                  }}
-                                />
-                              </div>
-                            </div>
-                            <div className="w-full lg:w-4/12 px-4">
-                              <div className="relative w-full mb-3">
-                                <label
-                                  className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                                  htmlFor="grid-password"
-                                >
-                                  City
-                                </label>
-                                <input
-                                  type="email"
-                                  className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                  placeholder="New York"
-                                  onChange={(e) => {
-                                    setCity(e.target.value);
-                                  }}
-                                />
-                              </div>
-                            </div>
-                            <div className="w-full lg:w-4/12 px-4">
-                              <div className="relative w-full mb-3">
-                                <label
-                                  className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                                  htmlFor="grid-password"
-                                >
-                                  Country
-                                </label>
-                                <input
-                                  type="text"
-                                  className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                  placeholder="United States"
-                                  onChange={(e) => {
-                                    setCountry(e.target.value);
-                                  }}
-                                />
-                              </div>
-                            </div>
-                            <div className="w-full lg:w-4/12 px-4">
-                              <div className="relative w-full mb-3">
-                                <label
-                                  className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                                  htmlFor="grid-password"
-                                >
-                                  Postal Code
-                                </label>
-                                <input
-                                  type="text"
-                                  className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                  placeholder="Postal Code"
-                                  onChange={(e) => {
-                                    setPostalCode(e.target.value);
-                                  }}
-                                />
-                              </div>
-                            </div>
-                          </div>
-
-                          <hr className="mt-6 border-b-1 border-blueGray-300" />
-                        </form>
-                      </div>
+                      )}
                     </div>
                   </div>
 
@@ -414,16 +507,6 @@ export default function Buy(props) {
                       onClick={() => setShowModal(false)}
                     >
                       Close
-                    </button>
-                    <button
-                      className="bg-emerald-500 text-white active:bg-emerald-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
-                      type="button"
-                      onClick={() => {
-                        generateInvoice();
-                        setShowModal(false);
-                      }}
-                    >
-                      Place Order
                     </button>
                   </div>
                 </div>
@@ -466,7 +549,7 @@ export default function Buy(props) {
                         clickable
                         target="_blank"
                       >
-                       Check Invoice Details
+                        Check Invoice Details
                       </a>
                     </h6>
                   </div>
@@ -486,181 +569,98 @@ export default function Buy(props) {
         ) : (
           <section className="items-center flex h-screen max-h-860-px">
             {/* LEFT SIDE */}
-            {productObject != null &&
-              nftObject != null &&
-              warrantyObject != null && (
-                <div className="w-full lg:w-8/12 px-4">
-                  <div className="flex flex-wrap">
-                    <div className="w-full">
-                      <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded">
-                        <div className="px-4 py-5 flex-auto">
-                          <div className="tab-content tab-space">
-                            <div
-                              className={openTab === 1 ? "block" : "hidden"}
-                              id="link1"
-                            >
-                              <div className="flex flex-wrap justify-center">
-                                <div className="w-3/12 sm:w-4/12 px-4">
-                                  <h6 className="text-xl font-normal leading-normal mt-0 mb-2 text-lightBlue-800">
-                                    {productObject.name}
-                                  </h6>
-                                  <img
-                                    src={getURLLink(productObject.image)}
-                                    alt="..."
-                                    className="rounded align-middle border-none"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              className={openTab === 2 ? "block" : "hidden"}
-                              id="link2"
-                            >
-                              <div className="flex flex-wrap justify-center">
-                                <div className="w-3/12 sm:w-4/12 px-4">
-                                  <h6 className="text-xl font-normal leading-normal mt-0 mb-2 text-lightBlue-800">
-                                    NFT Version
-                                  </h6>
-                                  <img
-                                    src={getURLLink(nftObject.image)}
-                                    alt="..."
-                                    style= {{maxHeight:"500px"}}
-                                    className="rounded align-middle border-none max-w-860px"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              className={openTab === 3 ? "block" : "hidden"}
-                              id="link3"
-                            >
-                              <div className="flex flex-wrap justify-center">
-                                <div className="w-3/12 sm:w-4/12 px-4">
-                                  <h6 className="text-xl font-normal leading-normal mt-0 mb-2 text-lightBlue-800">
-                                    {warrantyObject.description}
-                                  </h6>
-                                  <img
-                                    src={getURLLink(warrantyObject.image)}
-                                    alt="..."
-                                    className="rounded align-middle border-none"
-                                  />
-                                </div>
+            {propertyName != null && (
+              <div className="w-full lg:w-8/12 px-6">
+                <div className="bg-blueGray-100">
+                  {/* <div className=" flex flex-wrap"> */}
+                  <div className="w-full md:w-12/12 px-12 md:px-4">
+                    <br />
+                    <br />
+                    <section className="flex">
+                      <div>
+                        <h2 className="font-semibold text-4xl">
+                          {propertyName}
+                        </h2>
+                      </div>
+
+                      <div className="w-full lg:w-4/12 px-1">
+                        {estateObject.verified && (
+                          <img
+                            style={{ height: "40px" }}
+                            src="https://www.pngmart.com/files/12/Instagram-Verified-Badge-PNG-Image.png"
+                          ></img>
+                        )}
+                      </div>
+                    </section>
+                    <br />
+                    <br />
+                    {propertyDesc}
+                    <br />
+
+                    <br />
+                    <br />
+                    <p className="text-lg leading-relaxed  text-blueGray-500">
+                      Property ID : {id}
+                    </p>
+                    <p className="text-lg leading-relaxed  text-blueGray-500">
+                      Seller : {estateObject.seller}
+                    </p>
+                    <p className="text-lg leading-relaxed  text-blueGray-500">
+                      <a href={propertyDoc} clickable target="_blank">
+                        Property Document
+                      </a>
+                    </p>
+                    <br />
+                    <br />
+                    {estateObject.verified && (
+                      <button
+                        className="bg-lightBlue-600 text-white active:bg-blue-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+                        type="button"
+                        onClick={() => checkDeal()}
+                      >
+                        Check Deal
+                      </button>
+                    )}
+
+                    <br />
+                    <br />
+                  </div>
+
+                  {/* </div> */}
+                </div>
+              </div>
+            )}
+
+            {/* RIGHT SIDE */}
+            {propertyName != null && (
+              <div className="w-full lg:w-6/12 px-4">
+                <div className="flex flex-wrap">
+                  <div className="w-full">
+                    <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-6">
+                      <div className="px-4 py-6 flex-auto">
+                        <div className="tab-content tab-space">
+                          <div
+                            className={openTab === 1 ? "block" : "hidden"}
+                            id="link1"
+                          >
+                            <div className="flex flex-wrap justify-center">
+                              <div className="w-3/12 sm:w-4/12 px-4">
+                                <img
+                                  style={{ height: "400px" }}
+                                  src={propertyImage}
+                                  alt="..."
+                                  className="rounded align-middle border-none"
+                                />
                               </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                      <ul
-                        className="flex mb-0 list-none flex-wrap pt-3 pb-4 flex-row"
-                        role="tablist"
-                      >
-                        <li className="-mb-px mr-2 last:mr-0 flex-auto text-center">
-                          <a
-                            className={
-                              "text-xs font-bold uppercase px-5 py-3 shadow-lg rounded block leading-normal " +
-                              (openTab === 1
-                                ? "text-white bg-lightBlue-600"
-                                : "text-lightBlue-600 bg-white")
-                            }
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setOpenTab(1);
-                            }}
-                            data-toggle="tab"
-                            href="#link1"
-                            role="tablist"
-                          >
-                            <i className="fas fa-space-shuttle text-base mr-1"></i>{" "}
-                            Product
-                          </a>
-                        </li>
-                        <li className="-mb-px mr-2 last:mr-0 flex-auto text-center">
-                          <a
-                            className={
-                              "text-xs font-bold uppercase px-5 py-3 shadow-lg rounded block leading-normal " +
-                              (openTab === 2
-                                ? "text-white bg-lightBlue-600"
-                                : "text-lightBlue-600 bg-white")
-                            }
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setOpenTab(2);
-                            }}
-                            data-toggle="tab"
-                            href="#link2"
-                            role="tablist"
-                          >
-                            <i className="fas fa-cog text-base mr-1"></i>
-                            NFT Version
-                          </a>
-                        </li>
-                        <li className="-mb-px mr-2 last:mr-0 flex-auto text-center">
-                          <a
-                            className={
-                              "text-xs font-bold uppercase px-5 py-3 shadow-lg rounded block leading-normal " +
-                              (openTab === 3
-                                ? "text-white bg-lightBlue-600"
-                                : "text-lightBlue-600 bg-white")
-                            }
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setOpenTab(3);
-                            }}
-                            data-toggle="tab"
-                            href="#link3"
-                            role="tablist"
-                          >
-                            <i className="fas fa-briefcase text-base mr-1"></i>{" "}
-                            Warranty Card
-                          </a>
-                        </li>
-                      </ul>
                     </div>
                   </div>
                 </div>
-              )}
-            {/* RIGHT SIDE */}
-            {productObject != null &&
-              nftObject != null &&
-              warrantyObject != null && (
-                <div className="w-full lg:w-6/12 px-6">
-                  <div className="bg-blueGray-100">
-                    {/* <div className=" flex flex-wrap"> */}
-                    <div className="w-full md:w-12/12 px-12 md:px-4">
-                      <br />
-                      <br />
-                      <h2 className="font-semibold text-4xl">
-                        {productObject.name}
-                      </h2>
-                      By {product.seller}
-                      <br />
-                      Product ID : {product.itemID}
-                      <br />
-                      <br />
-                      <p className="text-lg leading-relaxed  text-blueGray-500">
-                        {productObject.description}
-                      </p>
-                      <p className="text-lg leading-relaxed  text-blueGray-500">
-                        {warrantyObject.description}
-                      </p>
-                      <br />
-                      <br />
-                      <br />
-                      <button
-                        className="bg-lightBlue-600 text-white active:bg-blue-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
-                        type="button"
-                        onClick={() => makePayment()}
-                      >
-                        {product.cost / 1000000000000000000} MATIC | Buy Now
-                      </button>
-                      <br />
-                      <br />
-                    </div>
-
-                    {/* </div> */}
-                  </div>
-                </div>
-              )}
+              </div>
+            )}
           </section>
         )}
         <Footer />

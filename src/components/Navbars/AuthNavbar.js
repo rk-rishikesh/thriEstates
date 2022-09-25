@@ -13,7 +13,7 @@ export default function Navbar(props) {
               to="/"
               className="text-blueGray-700 text-sm font-bold leading-relaxed inline-block mr-4 py-2 whitespace-nowrap uppercase"
             >
-              Brandvilla
+              3Estates
             </Link>
           </div>
 
@@ -23,7 +23,7 @@ export default function Navbar(props) {
                 className="text-black text-sm font-bold leading-relaxed inline-block mr-4 py-2 whitespace-nowrap uppercase"
                 to="/"
               >
-                Welcome to Metaverse 
+                 
               </Link>
             </div>
           </div>
