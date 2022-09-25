@@ -1,8 +1,8 @@
-"# Brandvilla" 
+"# 3Estates" 
 
 
 
-> This project was a submitted at web3Conf India 2022
+> This project was a submitted at ETHOnline 2022
 ## Instructions to run the project locally
 
   
