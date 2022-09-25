@@ -12,8 +12,6 @@ Install the following prerequisites
 
 [NPM](https://nodejs.org)
 
-[Sequence Wallet](https://sequence.app/wallet)
-
 ### Clone the project
 ```bash
   git clone https://github.com/rk-rishikesh/Brandvilla.git
