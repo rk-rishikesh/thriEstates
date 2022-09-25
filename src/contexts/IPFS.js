@@ -12,7 +12,7 @@ export function IPFSContextProvider(props) {
       setIPFSerror(null);
       setIPFSuploading(true);
       const client = new NFTStorage({
-        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweEYxMjRGNzViYzgwMWE1MmVENTkxQzRBNjVkRWVjMEUxMkVjZTgxRGEiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY1ODIwNTU0OTA0MywibmFtZSI6IkJyYW5kVmlsbGEifQ.JDMQvijY7xLoPahhx8RhWkfZBG8gY9c1-EG-gJ259dE"
+        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweEYxMjRGNzViYzgwMWE1MmVENTkxQzRBNjVkRWVjMEUxMkVjZTgxRGEiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY2NDEzMDQ4NzAyMiwibmFtZSI6IjNFc3RhdGVzIn0.6GtIH1dEXlOzT4YyTdTQaltFLtuMhn5fWLZrPZ_xthY"
       });
       console.log(new File([file], file.name, { type: file.type }))
       const metadata = await client.store({
