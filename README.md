@@ -1,8 +1,6 @@
 "# 3Estates" 
 
 
-
-> This project was a submitted at ETHOnline 2022
 ## Instructions to run the project locally
 
   
