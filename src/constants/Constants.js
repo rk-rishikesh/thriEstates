@@ -1,4 +1,4 @@
-export const ThriEstates = "0xbd46E6B27d1eAD2f1cfeE626d92bf745AE849a24";
+export const ThriEstates = "0x6Ff4EB9c45D61CE7bC9E5A33f0f9E845DDec411D";
 
 export const ThriEstatesABI = [
   {
@@ -35,7 +35,7 @@ export const ThriEstatesABI = [
   },
 ];
 
-export const RealEstateNFT = "0xeC2075dF04c1a8a44E60F2BD5FB38A143C93E896";
+export const RealEstateNFT = "0x8Fee4cEf96fc5F85260E4512E9Fd2441849953C1";
 
 export const RealEstateABI = [
   { inputs: [], stateMutability: "nonpayable", type: "constructor" },
@@ -231,7 +231,7 @@ export const RealEstateABI = [
   },
 ];
 
-export const Marketplace = "0x377db8CC7A01B741879eCaaD7e6Ad8180961599C";
+export const Marketplace = "0xe21bBC525B7F580bC1102b19dE2fE2735480Fc40";
 
 export const MarketplaceABI = [
   {
@@ -326,7 +326,7 @@ export const MarketplaceABI = [
   },
 ];
 
-export const Document = "0x0bC22b9c2C139fCE3c191F774Fe67Fd4D3F2005A";
+export const Document = "0xAf351e6F382CEb02fb322adA580FB09760e36dd8";
 
 export const DocumentABI = [
   { inputs: [], stateMutability: "nonpayable", type: "constructor" },
